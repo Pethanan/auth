@@ -4,24 +4,21 @@ import classes from "./AuthForm.module.css";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [isSignUpBtnClicked, setIsSignUpBtnClicked] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const emailRef = useRef();
   const pwdRef = useRef();
   const switchAuthModeHandler = () => {
     setIsLogin((prevState) => !prevState);
-
-    setIsSignUpBtnClicked(true);
   };
 
   const submitHandler = (e) => {
     e.preventDefault();
     const enteredMailId = emailRef.current.value;
     const enteredPwd = pwdRef.current.value;
-
+    setIsLoading(true);
     if (isLogin) {
-    } else {
       fetch(
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithCustomToken?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
         {
           method: "POST",
           body: JSON.stringify({
@@ -34,9 +31,37 @@ const AuthForm = () => {
           },
         }
       ).then((res) => {
+        setIsLoading(false);
+        if (res.ok) {
+          res.json().then((data) => {
+            return console.log(data.idToken);
+          });
+        } else {
+          return res.json().then((data) => {
+            console.log(data && data.error && data.error.message);
+            alert("authentication failed");
+          });
+        }
+      });
+    } else {
+      fetch(
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email: enteredMailId,
+            password: enteredPwd,
+            returnSecureToken: true,
+          }),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      ).then((res) => {
+        setIsLoading(false);
         if (res.ok) {
         } else {
-          res.json().then((data) => {
+          return res.json().then((data) => {
             console.log(data);
           });
         }
@@ -57,7 +82,11 @@ const AuthForm = () => {
           <input type="password" id="password" ref={pwdRef} required />
         </div>
         <div className={classes.actions}>
-          <button>{isLogin ? "Login" : "create new account"}</button>
+          {!isLoading && (
+            <button>{isLogin ? "Login" : "create new account"}</button>
+          )}
+          {isLoading && <p>sending request...</p>}
+
           <button
             type="button"
             className={classes.toggle}
@@ -65,7 +94,6 @@ const AuthForm = () => {
           >
             {isLogin ? "Create new account" : "Login with existing account"}
           </button>
-          {isSignUpBtnClicked && <p>sending request...</p>}
         </div>
       </form>
     </section>
