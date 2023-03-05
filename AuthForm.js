@@ -3,6 +3,7 @@ import { useState, useRef } from "react";
 import classes from "./AuthForm.module.css";
 import { useContext } from "react";
 import AuthContext from "../../store/auth-ctx";
+import UserProfile from "../Profile/UserProfile";
 
 const AuthForm = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -74,33 +75,38 @@ const AuthForm = () => {
   };
 
   return (
-    <section className={classes.auth}>
-      <h1>{isLogin ? "Login" : "Sign Up"}</h1>
-      <form onSubmit={submitHandler}>
-        <div className={classes.control}>
-          <label htmlFor="email">Your Email</label>
-          <input type="email" id="email" ref={emailRef} required />
-        </div>
-        <div className={classes.control}>
-          <label htmlFor="password">Your Password</label>
-          <input type="password" id="password" ref={pwdRef} required />
-        </div>
-        <div className={classes.actions}>
-          {!isLoading && (
-            <button>{isLogin ? "Login" : "create new account"}</button>
-          )}
-          {isLoading && <p>sending request...</p>}
+    <>
+      {!authCtx.isLoggedIn && (
+        <section className={classes.auth}>
+          <h1>{isLogin ? "Login" : "Sign Up"}</h1>
+          <form onSubmit={submitHandler}>
+            <div className={classes.control}>
+              <label htmlFor="email">Your Email</label>
+              <input type="email" id="email" ref={emailRef} required />
+            </div>
+            <div className={classes.control}>
+              <label htmlFor="password">Your Password</label>
+              <input type="password" id="password" ref={pwdRef} required />
+            </div>
+            <div className={classes.actions}>
+              {!isLoading && (
+                <button>{isLogin ? "Login" : "create new account"}</button>
+              )}
+              {isLoading && <p>sending request...</p>}
 
-          <button
-            type="button"
-            className={classes.toggle}
-            onClick={switchAuthModeHandler}
-          >
-            {isLogin ? "Create new account" : "Login with existing account"}
-          </button>
-        </div>
-      </form>
-    </section>
+              <button
+                type="button"
+                className={classes.toggle}
+                onClick={switchAuthModeHandler}
+              >
+                {isLogin ? "Create new account" : "Login with existing account"}
+              </button>
+            </div>
+          </form>
+        </section>
+      )}
+      {authCtx.isLoggedIn && <UserProfile />}
+    </>
   );
 };
 
