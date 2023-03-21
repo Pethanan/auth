@@ -15,13 +15,13 @@ const AuthForm = () => {
     setIsLogin((prevState) => !prevState);
   };
 
-  const submitHandler = (e) => {
+  const submitHandler = async (e) => {
     e.preventDefault();
     const enteredMailId = emailRef.current.value;
     const enteredPwd = pwdRef.current.value;
     setIsLoading(true);
     if (isLogin) {
-      fetch(
+      const authResponse = await fetch(
         "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
         {
           method: "POST",
@@ -34,22 +34,13 @@ const AuthForm = () => {
             "Content-Type": "application/json",
           },
         }
-      ).then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-          res.json().then((data) => {
-            authCtx.login(data.idToken);
-            return console.log(data.idToken);
-          });
-        } else {
-          return res.json().then((data) => {
-            console.log(data && data.error && data.error.message);
-            alert("authentication failed");
-          });
-        }
-      });
+      );
+
+      setIsLoading(false);
+      const authData = await authResponse.json();
+      authCtx.login(authData.idToken);
     } else {
-      fetch(
+      const signupResponse = fetch(
         "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
         {
           method: "POST",
@@ -62,15 +53,11 @@ const AuthForm = () => {
             "Content-Type": "application/json",
           },
         }
-      ).then((res) => {
-        setIsLoading(false);
-        if (res.ok) {
-        } else {
-          return res.json().then((data) => {
-            console.log(data);
-          });
-        }
-      });
+      );
+      setIsLoading(false);
+      alert("Your account has been created successfully!");
+      emailRef.current.value = "";
+      pwdRef.current.value = "";
     }
   };
 

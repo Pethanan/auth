@@ -4,27 +4,33 @@ import AuthContext from "../../store/auth-ctx";
 import { useContext } from "react";
 
 const ProfileForm = () => {
-  const [newPwd, setNewPwd] = useState("");
   const newPwdRef = useRef();
   const authCtx = useContext(AuthContext);
 
   const newPwdSubmitHandler = (e) => {
     e.preventDefault();
-    setNewPwd(newPwdRef.current.value);
+    const newPwd = newPwdRef.current.value;
+    console.log(newPwd);
     fetch(
       "https://identitytoolkit.googleapis.com/v1/accounts:update?key=AIzaSyDVg383Q9Obw_imsQzsLRUj65bQVspoXJg",
       {
-        idToken: authCtx.token,
-        newPassword: newPwd,
-        returnSecureToken: true,
+        method: "POST",
+        body: JSON.stringify({
+          idToken: authCtx.token,
+          password: newPwd,
+          returnSecureToken: true,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
     )
       .then((res) => {
         authCtx.logout();
-        res.json();
+        return res.json();
       })
       .then((data) => {
-        alert(data);
+        console.log(data);
       });
   };
 
